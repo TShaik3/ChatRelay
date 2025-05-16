@@ -1,6 +1,5 @@
-# communicationsGroup4
-# CS401-01
-# Team Members: Zoheb Sharif, Kenneth Kottenstette, Talhah Shaik
+# ChatRelay - A Chat Application
+# Original Team: Zoheb Sharif, Kenneth Kottenstette, Talhah Shaik
 
 This group project for CS401 (Software Engineering) will demonstrate our understanding of fundamental software engineering concepts by developing a fully functional communications application using exclusively Java. The application sport software components like a backend server, a graphical user interface (GUI), a server, and multiple clients to support real-time messaging. 
 
