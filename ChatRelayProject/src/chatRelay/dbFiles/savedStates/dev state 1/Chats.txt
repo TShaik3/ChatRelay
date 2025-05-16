@@ -1,0 +1,4 @@
+1/1/general chat/true/1
+2/1/private chat/true/1,2,6
+3/2/private chat/true/2,3,5
+4/8/this name should change/8,1,2,3

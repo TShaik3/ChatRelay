@@ -1,9 +1,0 @@
-1/1/General Chat/true/1
-2/1/Private Chat/true/1,2,6,4
-3/2/private chat/true/2,3,5
-4/8/this name should change/true/8,1,2,3
-5/1/Testing Chat Creation/true/1,6,8
-6/1/Chat Room/true/1,4,9
-7/1/New Chat Room/true/1,5
-8/1/Chat Room/true/1
-9/1/Create New Chat/true/1,2,7,10
