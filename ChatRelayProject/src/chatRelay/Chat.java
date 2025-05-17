@@ -60,6 +60,13 @@ public class Chat {
         messages.add(msg);
 		Collections.sort(messages, (m1, m2) -> (int) m1.getCreatedAt() - (int) m2.getCreatedAt());
     }
+
+    // edit Chat
+    public void editChat(String newName, ArrayList<AbstractUser> listOfUsers) {
+        this.roomName = newName;
+        this.chatters = Arrays.asList(listOfUsers);
+        Collections.sort(chatters, (u1, u2) -> u1.getId().compareTo(u2.getId()));
+    }
     
     // change privacy
     // if private, only owner can add users

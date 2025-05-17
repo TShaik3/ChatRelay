@@ -137,7 +137,21 @@ public class Client {
         	}
     	}
     }
-    
+
+	public void editChatDetails(String[] userId, String chatName, String chatId) {
+		ArrayList<String> args = new ArrayList<>();
+		String joinedUsers = String.join("/", userIds);
+		args.add(joinedUsers);
+		args.add(chatName);
+		args.add(chatId);
+		Packet updateChat = new Packet(Status.NONE, actionType.EDIT_CHAT, args, this.userId);
+		try {
+			objectStream.writeObject(updateChat);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
     public void addUserToChat(String userId, String chatId) {
     	ArrayList<String> args = new ArrayList<>();
     	args.add(userId);
@@ -458,6 +472,22 @@ public class Client {
 							chat.addMessage(newMessage);
 							lastChatSent = newMessage.getChat();
 							updateState(actionType.NEW_MESSAGE_BROADCAST);
+						}
+						case EDIT_CHAT -> {
+							List<String> args = incoming.getActionArguements();
+
+							String chatId = args.get(0);
+							String roomName = args.get(1);
+							String[] userIds = args.get(2).split("/");
+
+							Chat changeChat = findChatById(chatId);
+
+							List<AbstractUser> chatters = new ArrayList<>();
+							for (String userId : userIds) {
+								chatters.add(getUserById(userId));
+							}
+							changeChat.editChat(roomName, chatters);
+							updateState(actionType.NEW_CHAT_BROADCAST);
 						}
 						case SEND_MESSAGE -> {
 							if (incoming.getStatus() == Status.SUCCESS) {

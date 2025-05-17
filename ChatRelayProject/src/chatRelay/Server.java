@@ -78,11 +78,15 @@ public class Server {
 				System.out.println("Server.receievePacket REMOVE_USER_FROM_CHAT switch fired");
 				handleRemoveUserFromChat(clientId, packet);
 				break;
-
 			case RENAME_CHAT:
 				System.out.println("Server.receievePacket RENAME_CHAT switch fired");
 				handleRenameChat(clientId, packet);
 				break;
+			case EDIT_CHAT:
+				System.out.println("Server.receievePacket EDIT_CHAT switch fired");
+				handleEditChat(clientId, packet);
+				break;
+
 			case LOGOUT:
 				System.out.println("Server.receievePacket LOGOUT switch fired");
 				handleLogout(clientId);
@@ -92,6 +96,54 @@ public class Server {
 			}
 		} catch (Exception e) {
 			sendErrorMessage(clientId, "Unable to handle the packet");
+		}
+	}
+
+	private void handleEditChat(String clientId, Packet) {
+		ArrayList<String> args = packet.getActionArguments();
+		ArrayList<String> userIds = new ArrayList<>();
+
+		for (String userId : args.get(0).split("/")) {
+			userIds.add(userId);
+		}
+
+		String roomName = args.get(1);
+		Chat currentChat = dbManager.getChatById(args.get(2));
+
+		if (!currentChat.getName().equals(roomName)) {
+			currentChat = dbManager.renameChat(clientId, args.get(2), roomName);
+		}
+
+		ArrayList<String> chatUserIds = currentChat.getChattersIds();
+		ArrayList<String> chatUserIdsToChange = chatUserIds.stream().filter(element -> !userIds.contains(element))
+				.collect(Collectors.toList());
+		for (String userId : chatUserIdsToChange) {
+			if (userIds.contains(userId)) {
+				currentChat = dbManager.removeUserFromChat(userId, args.get(2), clientId);
+			} else {
+				currentChat = dbManager.addUserToChat(userId, args.get(2), clientId);
+			}
+		}
+
+		ArrayList<String> broadcastingArgs = new ArrayList<>();
+
+		if (currentChat == null) {
+			broadcastingArgs.add("Unable to edit Chat");
+			Packet errorPacket = new Packet(Status.ERROR, actionType.EDIT_CHAT, broadcastingArgs, "Server");
+			broadcastToClientById(clientId, errorPacket);
+			return;
+		}
+
+		broadcastingArgs.add(currentChat.getId());
+		broadcastingArgs.add(roomName);
+		broadcastingArgs.add(String.join("/", currentChat.getChattersIds()));
+
+		Packet chatPacket = new Packet(Status.SUCCESS, actionType.EDIT_CHAT, broadcastingArgs, "Server");
+
+		if (currentChat.isPrivate()) {
+			broadcastToUsers(currentChat.getChatters(), chatPacket);
+		} else {
+			broadcastToAllUsersConnected(chatPacket);
 		}
 	}
 
