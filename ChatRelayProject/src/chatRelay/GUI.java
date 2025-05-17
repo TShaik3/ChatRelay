@@ -293,7 +293,12 @@ public class GUI extends JFrame implements Runnable {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (!chatMessagesPanel.getName().equals("panel")) {
-					editChatDialog(client.getChatById(chatMessagesPanel.getName()));
+                    Chat currentChat = client.getChatById(chatMessagesPanel.getName());
+                    if (currentChat.getOwner() == client.getThisUser()) {
+                        editChatDialog(currentChat);
+                    } else {
+                        JOptionPane.showMessageDialog(frame, "You are not the owner of this chat.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
 				}
 			}
         });
@@ -608,28 +613,16 @@ public class GUI extends JFrame implements Runnable {
         saveButton.addActionListener(e -> {
             String chatName = nameField.getText().trim();
             if (chatName.isBlank()) { chatName = "Chat Room"; }
-            if (!chatName.equals(chat.getRoomName())) {
-                client.renameChat(chat.getId(), chatName);
-            }
+
             List<String> namedUsers = userList.getSelectedValuesList();
-            
             List<AbstractUser> selectedUsers = new ArrayList<>();
             selectedUsers.add(client.getThisUser());
+
             for (int i = 1; i < namedUsers.size(); i++) {
             	selectedUsers.add(searchForUser(namedUsers.get(i)));
             }
-            
-            for(AbstractUser user : selectedUsers) {
-            	if (!chat.getChatters().contains(user)) {
-            		client.addUserToChat(user.getId(), chat.getId());
-            	}
-            }
-            
-            for (AbstractUser user : chat.getChatters()) {
-            	if (!selectedUsers.contains(user)) {
-            		client.removeUserFromChat(user.getId(), chat.getId());
-            	}
-            }
+
+            client.editChatDetails(String.join("/", selectedUsers), chatName, chat.getId());
             dialog.dispose();
         });
 

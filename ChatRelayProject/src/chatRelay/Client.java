@@ -138,10 +138,9 @@ public class Client {
     	}
     }
 
-	public void editChatDetails(String[] userId, String chatName, String chatId) {
+	public void editChatDetails(String userIds, String chatName, String chatId) {
 		ArrayList<String> args = new ArrayList<>();
-		String joinedUsers = String.join("/", userIds);
-		args.add(joinedUsers);
+		args.add(userIds);
 		args.add(chatName);
 		args.add(chatId);
 		Packet updateChat = new Packet(Status.NONE, actionType.EDIT_CHAT, args, this.userId);
