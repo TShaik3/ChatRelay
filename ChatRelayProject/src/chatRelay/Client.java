@@ -473,13 +473,13 @@ public class Client {
 							updateState(actionType.NEW_MESSAGE_BROADCAST);
 						}
 						case EDIT_CHAT -> {
-							List<String> args = incoming.getActionArguements();
+							List<String> args = incoming.getActionArguments();
 
 							String chatId = args.get(0);
 							String roomName = args.get(1);
 							String[] userIds = args.get(2).split("/");
 
-							Chat changeChat = findChatById(chatId);
+							Chat changeChat = getChatById(chatId);
 
 							List<AbstractUser> chatters = new ArrayList<>();
 							for (String userId : userIds) {

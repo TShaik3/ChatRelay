@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class Server {
 	private static final ConcurrentHashMap<String, ClientHandler> clients = new ConcurrentHashMap<>();
@@ -22,7 +23,7 @@ public class Server {
 		
 		
 		// DEVELOPMENT DB - "/savedStates/dev state 1"
-		this.dbManager = new DBManager("./chatRelay/dbFiles/development/", "Users.txt", "Chats.txt", "Messages.txt");
+		this.dbManager = new DBManager("./src/chatRelay/dbFiles/development/", "Users.txt", "Chats.txt", "Messages.txt");
 		
 		// PRODUCTION DB - "/savedStates/prod state 1"
 		// USE THIS FOR PRESENTATION:
@@ -99,7 +100,7 @@ public class Server {
 		}
 	}
 
-	private void handleEditChat(String clientId, Packet) {
+	private void handleEditChat(String clientId, Packet packet) {
 		ArrayList<String> args = packet.getActionArguments();
 		ArrayList<String> userIds = new ArrayList<>();
 
@@ -110,15 +111,15 @@ public class Server {
 		String roomName = args.get(1);
 		Chat currentChat = dbManager.getChatById(args.get(2));
 
-		if (!currentChat.getName().equals(roomName)) {
+		if (!currentChat.getRoomName().equals(roomName)) {
 			currentChat = dbManager.renameChat(clientId, args.get(2), roomName);
 		}
 
 		ArrayList<String> chatUserIds = currentChat.getChattersIds();
-		ArrayList<String> chatUserIdsToChange = chatUserIds.stream().filter(element -> !userIds.contains(element))
-				.collect(Collectors.toList());
+		ArrayList<String> chatUserIdsToChange = (ArrayList<String>) userIds.stream().filter(element -> !chatUserIds.contains(element))
+				.collect(Collectors.toList()); // Stream Needs to be Fixed
 		for (String userId : chatUserIdsToChange) {
-			if (userIds.contains(userId)) {
+			if (chatUserIds.contains(userId)) {
 				currentChat = dbManager.removeUserFromChat(userId, args.get(2), clientId);
 			} else {
 				currentChat = dbManager.addUserToChat(userId, args.get(2), clientId);

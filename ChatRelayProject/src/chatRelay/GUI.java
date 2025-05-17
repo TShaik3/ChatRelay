@@ -615,11 +615,11 @@ public class GUI extends JFrame implements Runnable {
             if (chatName.isBlank()) { chatName = "Chat Room"; }
 
             List<String> namedUsers = userList.getSelectedValuesList();
-            List<AbstractUser> selectedUsers = new ArrayList<>();
-            selectedUsers.add(client.getThisUser());
+            List<String> selectedUsers = new ArrayList<>();
+            selectedUsers.add(client.getThisUser().getId());
 
             for (int i = 1; i < namedUsers.size(); i++) {
-            	selectedUsers.add(searchForUser(namedUsers.get(i)));
+            	selectedUsers.add(searchForUser(namedUsers.get(i)).getId());
             }
 
             client.editChatDetails(String.join("/", selectedUsers), chatName, chat.getId());

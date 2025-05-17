@@ -62,9 +62,9 @@ public class Chat {
     }
 
     // edit Chat
-    public void editChat(String newName, ArrayList<AbstractUser> listOfUsers) {
+    public void editChat(String newName, List<AbstractUser> listOfUsers) {
         this.roomName = newName;
-        this.chatters = Arrays.asList(listOfUsers);
+        this.chatters = listOfUsers;
         Collections.sort(chatters, (u1, u2) -> u1.getId().compareTo(u2.getId()));
     }
     
