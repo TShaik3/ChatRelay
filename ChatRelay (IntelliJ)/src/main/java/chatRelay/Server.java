@@ -5,7 +5,6 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -23,7 +22,7 @@ public class Server {
 		
 		
 		// DEVELOPMENT DB - "/savedStates/dev state 1"
-		this.dbManager = new DBManager("./src/chatRelay/dbFiles/development/", "Users.txt", "Chats.txt", "Messages.txt");
+		this.dbManager = new DBManager("./", "Users.txt", "Chats.txt", "Messages.txt");
 		
 		// PRODUCTION DB - "/savedStates/prod state 1"
 		// USE THIS FOR PRESENTATION:
@@ -55,41 +54,41 @@ public class Server {
 			System.out.println("Server.receivePacket() fired");
 			switch (packet.getActionType()) {
 			case SEND_MESSAGE:
-				System.out.println("Server.receievePacket() SEND_MESSAGE switch fired");
+				System.out.println("Server.receivePacket() SEND_MESSAGE switch fired");
 				handleSendMessage(clientId, packet);
 				break;
 			case CREATE_CHAT:
-				System.out.println("Server.receievePacket() CREATE_CHAT switch fired");
+				System.out.println("Server.receivePacket() CREATE_CHAT switch fired");
 				handleCreateChat(clientId, packet);
 				break;
 			case CREATE_USER:
-				System.out.println("Server.receievePacket() CREATE_USER switch fired");
+				System.out.println("Server.receivePacket() CREATE_USER switch fired");
 				handleCreateUser(clientId, packet);
 				break;
 			case UPDATE_USER:
-				System.out.println("Server.receievePacket() CREATE_USER switch fired");
+				System.out.println("Server.receivePacket() CREATE_USER switch fired");
 				handleUpdateUser(clientId, packet);
 				break;
 
 			case ADD_USER_TO_CHAT:
-				System.out.println("Server.receievePacket() ADD_USER_TO_CHAT switch fired");
+				System.out.println("Server.receivePacket() ADD_USER_TO_CHAT switch fired");
 				handleAddUserToChat(clientId, packet);
 				break;
 			case REMOVE_USER_FROM_CHAT:
-				System.out.println("Server.receievePacket REMOVE_USER_FROM_CHAT switch fired");
+				System.out.println("Server.receivePacket REMOVE_USER_FROM_CHAT switch fired");
 				handleRemoveUserFromChat(clientId, packet);
 				break;
 			case RENAME_CHAT:
-				System.out.println("Server.receievePacket RENAME_CHAT switch fired");
+				System.out.println("Server.receivePacket RENAME_CHAT switch fired");
 				handleRenameChat(clientId, packet);
 				break;
 			case EDIT_CHAT:
-				System.out.println("Server.receievePacket EDIT_CHAT switch fired");
+				System.out.println("Server.receivePacket EDIT_CHAT switch fired");
 				handleEditChat(clientId, packet);
 				break;
 
 			case LOGOUT:
-				System.out.println("Server.receievePacket LOGOUT switch fired");
+				System.out.println("Server.receivePacket LOGOUT switch fired");
 				handleLogout(clientId);
 				break;
 			default:
