@@ -25,7 +25,7 @@ import java.util.TimeZone;
 import javax.swing.*;
 
 public class GUI extends JFrame implements Runnable {
-    private Client client;
+    private final Client client;
     private JFrame frame;
     private JPanel privateChatsList;
     private JPanel groupChatsList;
@@ -49,7 +49,7 @@ public class GUI extends JFrame implements Runnable {
 			synchronized (frame) {
 				frame.wait();
 			}
-		} catch (InterruptedException e) { e.printStackTrace(); }
+		} catch (InterruptedException e) { System.out.println("Interrupted Exception"); }
 		if (client.getAdminStatus()) {
 			buildITGUI();
 		} else {
@@ -103,7 +103,7 @@ public class GUI extends JFrame implements Runnable {
         	
         	@Override
         	public void focusLost(FocusEvent e) {
-        		if (usernameField.getText().equals("Username") || usernameField.getText().length() == 0) {
+        		if (usernameField.getText().equals("Username") || usernameField.getText().isEmpty()) {
         			usernameField.setText("Username");
         			usernameField.setForeground(Color.GRAY);
         		} else {
@@ -125,7 +125,7 @@ public class GUI extends JFrame implements Runnable {
         	
         	@Override
         	public void focusLost(FocusEvent e) {
-        		if (passwordField.getText().equals("Password") || passwordField.getText().length() == 0) {
+        		if (passwordField.getText().equals("Password") || passwordField.getText().isEmpty()) {
         			passwordField.setText("Password");
         			passwordField.setForeground(Color.GRAY);
         		} else {
@@ -201,7 +201,7 @@ public class GUI extends JFrame implements Runnable {
     			synchronized (frame) {
     				frame.wait();
     			}
-    		} catch (InterruptedException e) { e.printStackTrace(); }
+    		} catch (InterruptedException e) { System.out.println("Interrupted Exception"); }
         }
 
         // Private Chats list (in a scroll pane)
@@ -272,35 +272,24 @@ public class GUI extends JFrame implements Runnable {
         	});
         }
         
-        addChatButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				showCreateChatDialog();
-			}
+        addChatButton.addActionListener(e -> showCreateChatDialog());
+        
+        sendButton.addActionListener(e -> {
+            if (!messageField.getText().isEmpty() && !chatMessagesPanel.getName().equals("panel")) {
+                client.sendMessage(chatMessagesPanel.getName(), messageField.getText());
+                messageField.setText("");
+            }
         });
         
-        sendButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (!messageField.getText().equals("") && !chatMessagesPanel.getName().equals("panel")) {
-					client.sendMessage(chatMessagesPanel.getName(), messageField.getText());
-					messageField.setText("");
-				}
-			}
-        });
-        
-        editChatButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (!chatMessagesPanel.getName().equals("panel")) {
-                    Chat currentChat = client.getChatById(chatMessagesPanel.getName());
-                    if (currentChat.getOwner() == client.getThisUser()) {
-                        editChatDialog(currentChat);
-                    } else {
-                        JOptionPane.showMessageDialog(frame, "You are not the owner of this chat.", "Error", JOptionPane.ERROR_MESSAGE);
-                    }
-				}
-			}
+        editChatButton.addActionListener(e -> {
+            if (!chatMessagesPanel.getName().equals("panel")) {
+                Chat currentChat = client.getChatById(chatMessagesPanel.getName());
+                if (currentChat.getOwner() == client.getThisUser()) {
+                editChatDialog(currentChat);
+                } else {
+                JOptionPane.showMessageDialog(frame, "You are not the owner of this chat.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
         });
         
         messageField.addKeyListener(new KeyAdapter() {
@@ -313,12 +302,9 @@ public class GUI extends JFrame implements Runnable {
             }
         });
         
-        logoutButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				client.logout();
-				frame.dispose();
-			}
+        logoutButton.addActionListener(e -> {
+            client.logout();
+            frame.dispose();
         });
 
         frame.setVisible(true);
@@ -369,7 +355,7 @@ public class GUI extends JFrame implements Runnable {
     			synchronized (frame) {
     				frame.wait();
     			}
-    		} catch (InterruptedException e) { e.printStackTrace(); }
+    		} catch (InterruptedException e) { System.out.println("Interrupted Exception"); }
         }
         
         // Private Chats list
@@ -477,7 +463,7 @@ public class GUI extends JFrame implements Runnable {
         sendButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!messageField.getText().equals("") && !chatMessagesPanel.getName().equals("panel")) {
+				if (!messageField.getText().isEmpty() && !chatMessagesPanel.getName().equals("panel")) {
 					client.sendMessage(chatMessagesPanel.getName(), messageField.getText());
 					messageField.setText("");
 				}
@@ -649,7 +635,7 @@ public class GUI extends JFrame implements Runnable {
 	    Object[][] data = new Object[client.getUsers().size()][2];
 	    
 	    for (int i = 0; i < client.getUsers().size(); i++) {
-	    	data[i][0] = client.getUsers().get(i).isDisabled();
+	    	data[i][0] = (Object) client.getUsers().get(i).isDisabled();
 	    	data[i][1] = client.getUsers().get(i).getFirstName() + " " + client.getUsers().get(i).getLastName();
 	    }
 
@@ -902,15 +888,15 @@ public class GUI extends JFrame implements Runnable {
 						}
 					}
 	            	String time = "No Messages";
-	            	if (chat.getMessages().size() > 0) {
-	            		long lastMessageTime = chat.getMessages().get(chat.getMessages().size() - 1).getCreatedAt();
+	            	if (!chat.getMessages().isEmpty()) {
+	            		long lastMessageTime = chat.getMessages().getLast().getCreatedAt();
 	                	DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm");
 	                	dateFormat.setTimeZone(TimeZone.getTimeZone("GMT-7"));
 	                	Date date = new Date(lastMessageTime);
 	                	time = dateFormat.format(date);
 	            	}
 	                JButton chatButton = new JButton("<html>" + owner + "<br>" + membersList + "<br>" + time + "</html>");
-	                if (!checkForUser(chat)) {
+	                if (checkForUser(chat)) {
 	                	chatButton.setBorder(BorderFactory.createLineBorder(Color.RED, 1));
 	                }
 	                chatMap.put(chatButton, chat);
@@ -929,15 +915,15 @@ public class GUI extends JFrame implements Runnable {
 						}
 					}
 	            	String time = "No Messages";
-	            	if (chat.getMessages().size() > 0) {
-	            		long lastMessageTime = chat.getMessages().get(chat.getMessages().size() - 1).getCreatedAt();
+	            	if (!chat.getMessages().isEmpty()) {
+	            		long lastMessageTime = chat.getMessages().getLast().getCreatedAt();
 	                	DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm");
 	                	dateFormat.setTimeZone(TimeZone.getTimeZone("GMT-7"));
 	                	Date date = new Date(lastMessageTime);
 	                	time = dateFormat.format(date);
 	            	}
 	                JButton groupButton = new JButton("<html>" + chat.getRoomName() + "<br>" + membersList + "<br>" + time + "</html>");
-	                if (!checkForUser(chat)) {
+	                if (checkForUser(chat)) {
 	                	groupButton.setBorder(BorderFactory.createLineBorder(Color.RED, 1));
 	                }
 	                chatMap.put(groupButton, chat);
@@ -950,10 +936,10 @@ public class GUI extends JFrame implements Runnable {
 	private boolean checkForUser(Chat chat) {
 		for (AbstractUser user : chat.getChatters()) {
 			if (user.getId().equals(client.getThisUser().getId())) {
-				return true;
+				return false;
 			}
 		}
-		return false;
+		return true;
 	}
 	
 	private void loadMessagePanel(JPanel chatMessagePanel, Chat chat) {

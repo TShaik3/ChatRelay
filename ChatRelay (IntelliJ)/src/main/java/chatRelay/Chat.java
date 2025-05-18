@@ -6,12 +6,12 @@ import java.util.List;
 
 public class Chat {
     private static int count = 0; // probably make atomic
-    private String id;
+    private final String id;
     private List<AbstractUser> chatters = new ArrayList<>();
     private List<Message> messages = new ArrayList<>(); 
-    private AbstractUser owner;
+    private final AbstractUser owner;
     private String roomName;
-    private Boolean isPrivate;
+    private boolean isPrivate;
 
     // constructor for new chats, doesnt take in an ID (needs to create unique id)
     // used for when users make new chats
@@ -29,7 +29,7 @@ public class Chat {
     // when loading in data from the .txt file (reads in an ID)
     //TODO : consider using a setter to add chatters to prevent having to do 2nd loop?
     public Chat(AbstractUser chatOwner, String name, String id, List<AbstractUser> chatters, boolean isPrivate) {
-    	++count; // needed to keep count synced
+    	++count; // needed to keep the count synced
     	
     	this.owner = chatOwner;
     	this.roomName = name;
@@ -57,14 +57,14 @@ public class Chat {
     // add message
     public void addMessage(Message msg) {
         messages.add(msg);
-		Collections.sort(messages, (m1, m2) -> (int) m1.getCreatedAt() - (int) m2.getCreatedAt());
+		messages.sort((m1, m2) -> (int) m1.getCreatedAt() - (int) m2.getCreatedAt());
     }
 
     // edit Chat
     public void editChat(String newName, List<AbstractUser> listOfUsers) {
         this.roomName = newName;
         this.chatters = listOfUsers;
-        Collections.sort(chatters, (u1, u2) -> u1.getId().compareTo(u2.getId()));
+        chatters.sort((u1, u2) -> u1.getId().compareTo(u2.getId()));
     }
     
     // change privacy
@@ -116,11 +116,11 @@ public class Chat {
     	return chattersIds;
     }
     
-    public void setRoomName(String newname) {
-    	this.roomName = newname;
+    public void setRoomName(String newName) {
+    	this.roomName = newName;
     }
     
-    public Boolean isPrivate() {
+    public boolean isPrivate() {
         return isPrivate;
     }
 }

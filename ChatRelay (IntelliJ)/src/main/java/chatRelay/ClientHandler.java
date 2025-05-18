@@ -10,11 +10,11 @@ import java.util.ArrayList;
 
 public class ClientHandler implements Runnable {
 
-	private Socket clientSocket;
+	private final Socket clientSocket;
 	private String userId;
 	private ObjectInputStream inputStream;
 	private ObjectOutputStream outputStream;
-	private Server server;
+	private final Server server;
 
 	public ClientHandler(Socket socket, Server server) {
 		this.clientSocket = socket;
@@ -28,7 +28,7 @@ public class ClientHandler implements Runnable {
 			inputStream = new ObjectInputStream(inStream);
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("Error creating input/output streams");
 		}
 	}
 
@@ -83,7 +83,7 @@ public class ClientHandler implements Runnable {
 			outputStream.writeObject(packet);
 			outputStream.flush();
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("Error sending packet");
 		}
 	}
 
@@ -115,33 +115,30 @@ public class ClientHandler implements Runnable {
 					return;
 				}
 
-				if (user != null) {
+                // Can't log in if User's account has been disabled
+                if (user.isDisabled()) {
+                    ArrayList<String> errorArgs = new ArrayList<>();
+                    errorArgs.add("User's account has been disabled");
 
-					// Can't log in if User's account has been disabled
-					if (user.isDisabled()) {
-						ArrayList<String> errorArgs = new ArrayList<>();
-						errorArgs.add("User's account has been disabled");
+                    Packet errorPacket = new Packet(Status.ERROR, actionType.LOGIN, errorArgs, "Server");
+                    sendPacket(errorPacket);
 
-						Packet errorPacket = new Packet(Status.ERROR, actionType.LOGIN, errorArgs, "Server");
-						sendPacket(errorPacket);
+                    clientSocket.close();
+                    return;
+                }
 
-						clientSocket.close();
-						return;
-					}
+                // Can't be logged into 2 computers as same user
+                if (server.containsClient(user.getId())) {
+                    ArrayList<String> errorArgs = new ArrayList<>();
+                    errorArgs.add("Already logged in from another client");
 
-					// Can't be logged into 2 computers as same user
-					if (server.containsClient(user.getId())) {
-						ArrayList<String> errorArgs = new ArrayList<>();
-						errorArgs.add("Already logged in from another client");
+                    Packet errorPacket = new Packet(Status.ERROR, actionType.LOGIN, errorArgs, "Server");
+                    sendPacket(errorPacket);
 
-						Packet errorPacket = new Packet(Status.ERROR, actionType.LOGIN, errorArgs, "Server");
-						sendPacket(errorPacket);
-
-						clientSocket.close();
-						return;
-          }
-        }
-				// check if user isn't disabled too
+                    clientSocket.close();
+                    return;
+}
+                // check if user isn't disabled too
 				if (!user.isDisabled()) {
 					this.userId = user.getId();
 
@@ -204,13 +201,13 @@ public class ClientHandler implements Runnable {
 			} while ((nextPacket = (Packet) inputStream.readObject()) != null);
 
 		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
+			System.out.println("Error reading packet");
 		} 
 		finally {
 			try {
 				clientSocket.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				System.out.println("Error closing client socket");
 			}
 			if (userId != null) {
 				server.handleLogout(userId);

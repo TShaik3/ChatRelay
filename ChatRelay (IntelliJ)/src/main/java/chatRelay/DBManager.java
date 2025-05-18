@@ -14,144 +14,19 @@ public class DBManager {
 	private ConcurrentHashMap<String, Message> messages = new ConcurrentHashMap<>();
 
 	private Server server; // maybe not needed?
-	private String txtFilePath;
-	private String userTxtFilename;
-	private String chatTxtFilename;
-	private String messageTxtFilename;
+    private final String userTxtFilename;
+	private final String chatTxtFilename;
+	private final String messageTxtFilename;
 
 //    filepath = "./src/chatRelay/dbFiles/development/"    (navigate from root path!)
 	public DBManager(String filepath, String userTxtFilename, String chatTxtFilename, String messageTxtFilename) {
-		this.txtFilePath = filepath;
-		this.userTxtFilename = filepath + userTxtFilename; // username/password/id/firstName/lastName/isDisabled/isAdmin
+        this.userTxtFilename = filepath + userTxtFilename; // username/password/id/firstName/lastName/isDisabled/isAdmin
 		this.chatTxtFilename = filepath + chatTxtFilename; // id/owner/roomName/[userId1, userId2, userId3]/isPrivate
 		this.messageTxtFilename = filepath + messageTxtFilename; // id/createdAt/content/authorId/chatId
 
 		loadUsers(); // convert TXT strings into real User objects, put those into the hashmap
 		loadChats();
 		loadMessages();
-
-	}
-
-	private void tester() {
-
-//---------------------		
-
-		writeNewMessage("This is a test message from constructor!", "1", "1");
-		writeNewMessage("ANOOTHER MESSAGE!", "1", "1");
-		writeNewMessage("!!!DANGEROUS / I JUST ADDED A SLASH!", "1", "1");
-
-//----------------------		
-
-//		String[] chatterIds = { "1", "2" };
-		ArrayList<String> chatterIds = new ArrayList<>();
-		chatterIds.add("1");
-		chatterIds.add("2");
-
-		writeNewChat("1", "writeNewChat() testing!", chatterIds, true);
-		writeNewChat("1", "writeNewChat() / with a backslash!!", chatterIds, true);
-
-//		---------------------
-
-		writeNewUser("zohsha", "asdf", "zoheb", "sharif", false, true);
-		writeNewUser("talsha", "asdf", "talhah", "shaik", false, true);
-
-		// PASSWORD W/ BACKSLASH
-		writeNewUser("biljoe", "asdf/", "bill", "joe", false, true);
-
-		// ---------------------
-
-		for (AbstractUser user : users.values()) {
-			System.out.println(user);
-		}
-
-		System.out.println("\n\nTest 'getUserById'");
-		AbstractUser u1 = getUserById("1");
-		System.out.println(u1);
-
-		System.out.println("\n\n\nCHECKING DB RELATIONSHIPS");
-
-		System.out.println("Total users loaded:    " + users.size());
-		System.out.println("Total chats loaded:    " + chats.size());
-		System.out.println("Total messages loaded: " + messages.size());
-
-		System.out.println("\n ---------------------------------------");
-
-		// Check each message has a valid author and chat
-		for (Message msg : messages.values()) {
-			if (msg.getSender() == null) {
-				System.out.println("!!! Message " + msg.getId() + " is missing an author.");
-			}
-			if (msg.getChat() == null) {
-				System.out.println("!!! Message " + msg.getId() + " is missing a chat.");
-			}
-		}
-
-		// Check all users referenced in chats actually exist
-		for (Chat chat : chats.values()) {
-			for (AbstractUser user : chat.getChatters()) {
-				if (!users.containsKey(user.getId())) {
-					System.out.println("!!! Chat " + chat.getId() + " includes unknown user: " + user.getId());
-				}
-			}
-		}
-
-		System.out.println("\n ---------------------------------------");
-		System.out.println(" ---------------------------------------");
-		System.out.println(" ---------------------------------------");
-		System.out.println("Messages: ");
-		for (Message msg : messages.values()) {
-			System.out.println("id: " + msg.getId() + ", createdAt: " + msg.getCreatedAt() + ", content: "
-					+ msg.getContent() + ", authorId " + msg.getSender().getId() + " chatId: " + msg.getChat().getId());
-		}
-
-		System.out.println("\n ---------------------------------------");
-		System.out.println(" ---------------------------------------");
-		System.out.println(" ---------------------------------------");
-		System.out.println("Users:");
-		for (AbstractUser user : users.values()) {
-			System.out.println("id: " + user.getId() + ", username: " + user.getUserName() + ", password:"
-					+ user.getPassword() + ", name: " + user.getFirstName() + " " + user.getLastName() + ", isAdmin: "
-					+ user.isAdmin() + ", isDisabled: " + user.isDisabled());
-		}
-
-		System.out.println("\n ---------------------------------------");
-		System.out.println(" ---------------------------------------");
-		System.out.println(" ---------------------------------------");
-		System.out.println("Chats:");
-		for (Chat chat : chats.values()) {
-			System.out.println("id: " + chat.getId() + ", roomName: " + chat.getRoomName() + ", ownerId: "
-					+ chat.getOwner().getId() + ", isPrivate: " + chat.isPrivate());
-		}
-
-// SERVER SHOULD DO THIS BELOW?
-// Work on the user flows for each scenarios next		
-
-		System.out.println(" ---------------------------------------");
-		System.out.println("Good login:");
-
-		// try both valid/invalid usernames/passwords
-		AbstractUser validUser1 = checkLoginCredentials("biljoe", "asdf/");
-		System.out.println(validUser1);
-
-		if (validUser1 != null && !validUser1.isDisabled()) {
-			System.out.println("we can proceed");
-		}
-
-		System.out.println("\nBad login:");
-
-		AbstractUser invalidUser1 = checkLoginCredentials("kenkot", "WRONG PASSWORD");
-		System.out.println(invalidUser1);
-
-		if (invalidUser1 != null && !invalidUser1.isDisabled()) {
-			System.out.println("we can proceed");
-		} else {
-			System.out.println("we can't proceed");
-		}
-
-//writeNewMessage("This is a test message from constructor!", "1", "1");
-//writeNewMessage("ANOOTHER MESSAGE!", "1", "1");
-
-		System.out.println(getChatById("1").getMessages().size());
 
 	}
 
@@ -217,15 +92,15 @@ public class DBManager {
 				String userId = words[2];
 				String firstName = words[3];
 				String lastName = words[4];
-				boolean isDisabled = words[5].equals("true") ? true : false;
-				boolean isAdmin = words[6].equals("true") ? true : false;
+				boolean isDisabled = words[5].equals("true");
+				boolean isAdmin = words[6].equals("true");
 
 				AbstractUser newUser;
 
 				if (isAdmin) {
-					newUser = new ITAdmin(username, password, userId, firstName, lastName, isDisabled, isAdmin);
+					newUser = new ITAdmin(username, password, userId, firstName, lastName, isDisabled, true);
 				} else {
-					newUser = new User(username, password, userId, firstName, lastName, isDisabled, isAdmin);
+					newUser = new User(username, password, userId, firstName, lastName, isDisabled, false);
 				}
 
 				users.put(userId, newUser);
@@ -248,7 +123,7 @@ public class DBManager {
 				String chatId = words[0];
 				String ownerId = words[1];
 				String roomName = words[2];
-				boolean isPrivate = words[3].equals("true") ? true : false;
+				boolean isPrivate = words[3].equals("true");
 				String[] userIds = words[4].split(",");
 
 				// TODO: Consider that this is adding the owner to chatters
@@ -345,9 +220,9 @@ public class DBManager {
 		AbstractUser newUser;
 
 		if (isAdmin) {
-			newUser = new ITAdmin(username, sanitizedPassword, firstname, lastname, isDisabled, isAdmin);
+			newUser = new ITAdmin(username, sanitizedPassword, firstname, lastname, isDisabled, true);
 		} else {
-			newUser = new User(username, sanitizedPassword, firstname, lastname, isDisabled, isAdmin);
+			newUser = new User(username, sanitizedPassword, firstname, lastname, isDisabled, false);
 		}
 
 		users.put(newUser.getId(), newUser);
@@ -359,7 +234,6 @@ public class DBManager {
 			writer.close();
 		} catch (IOException e) {
 			System.out.println("Error writing new user: " + e.getMessage());
-			e.printStackTrace();
 		}
 		return newUser;
 	}
@@ -395,7 +269,6 @@ public class DBManager {
 			writer.close();
 		} catch (IOException e) {
 			System.out.println("Error writing new chat: " + e.getMessage());
-			e.printStackTrace();
 		}
 
 		return newChat;
@@ -426,7 +299,6 @@ public class DBManager {
 
 		} catch (IOException e) {
 			System.out.println("Error writing new message: " + e.getMessage());
-			e.printStackTrace();
 		}
 
 		return newMessage;
@@ -489,7 +361,6 @@ public class DBManager {
 			writer.close();
 		} catch (IOException e) {
 			System.out.println("Error updating user file: " + e.getMessage());
-			e.printStackTrace();
 		}
 
 		return user;
@@ -522,7 +393,6 @@ public class DBManager {
 			writer.close();
 		} catch (IOException e) {
 			System.out.println("Error writing chat updates: " + e.getMessage());
-			e.printStackTrace();
 		}
 
 		return chat;
@@ -554,7 +424,6 @@ public class DBManager {
 			writer.close();
 		} catch (IOException e) {
 			System.out.println("Error writing chat updates: " + e.getMessage());
-			e.printStackTrace();
 		}
 
 		return chat;
@@ -581,7 +450,6 @@ public class DBManager {
 			writer.close();
 		} catch (IOException e) {
 			System.out.println("Error writing chat updates: " + e.getMessage());
-			e.printStackTrace();
 		}
 
 		return chat;

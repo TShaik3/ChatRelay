@@ -2,18 +2,18 @@ package chatRelay;
 
 public class Message {
 	private static int count = 0;
-	private String id;
+	private final String id;
 
-	private long createdAt;
+	private final long createdAt;
 
-	private String content;
-	private AbstractUser author;
-	private Chat chat;
+	private final String content;
+	private final AbstractUser author;
+	private final Chat chat;
 
 	// used when a user submits a new message
 	public Message(String content, AbstractUser author, Chat chat) {
 		this.id = String.valueOf(++count);
-		this.createdAt = System.currentTimeMillis(); // unix miliseconds
+		this.createdAt = System.currentTimeMillis(); // unix milliseconds
 		this.content = content;
 		this.author = author;
 

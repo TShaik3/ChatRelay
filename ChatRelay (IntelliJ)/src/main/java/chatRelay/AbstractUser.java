@@ -5,13 +5,13 @@ import java.util.List;
 
 public abstract class AbstractUser {
 	private static int count = 0; // probably need to use atomic for potential concurrency issue?
-	private String id;
-	private String firstName;
-	private String lastName;
-	private String username;
-	private String password;
-	private Boolean isDisabled;
-	private Boolean isAdmin = false;
+	private final String id;
+	private final String firstName;
+	private final String lastName;
+	private final String username;
+	private final String password;
+	private boolean isDisabled;
+	private boolean isAdmin = false;
 	private List<Chat> chats = new ArrayList<>();
 
 	// dones't take in id (this is when Admin creates a new user)

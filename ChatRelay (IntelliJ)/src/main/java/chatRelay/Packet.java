@@ -1,11 +1,13 @@
 package chatRelay;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalTime;
 import java.util.ArrayList;
 
 public class Packet implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 6310290976439495433L;
 	private static final String ESCAPED_SLASH = "<<<SLASH>>>";
 	private static final String ESCAPED_NEWLINE = "<<<NEWLINE>>>";
@@ -23,18 +25,18 @@ public class Packet implements Serializable {
 	}
 
 	public static boolean isAlphanumeric(String s) {
-		if (s == null) return false;
-		return s.matches("[A-Za-z0-9]+");
+		if (s == null) return true;
+		return !s.matches("[A-Za-z0-9]+");
 	}
 	
 
 	private static int count = 0;
 	private String id;
-	private actionType acType;
-	private Status status;
-	private ArrayList<String> actionArgs;
-	private LocalTime timeCreated;
-	private String senderId;
+	private final actionType acType;
+	private final Status status;
+	private final ArrayList<String> actionArgs;
+	private final LocalTime timeCreated;
+	private final String senderId;
 
 	public Packet(Status status, actionType acType, ArrayList<String> actionArguments, String senderId) {
 		this.status = status;
@@ -51,17 +53,13 @@ public class Packet implements Serializable {
 				actionArguments.set(1, sanitize(actionArguments.get(1)));
 				break;
 			case SEND_MESSAGE:
-				actionArguments.set(0, sanitize(actionArguments.get(0)));
+				actionArguments.set(0, sanitize(actionArguments.getFirst()));
 				break;
-			case CREATE_CHAT:
+			case CREATE_CHAT, RENAME_CHAT:
 				actionArguments.set(1, sanitize(actionArguments.get(1)));
 				break;
 
-			case RENAME_CHAT:
-				actionArguments.set(1, sanitize(actionArguments.get(1)));
-				break;
-
-			// ADMIN ACTIONS
+                // ADMIN ACTIONS
 			case CREATE_USER:
 				actionArguments.set(0, sanitize(actionArguments.get(0)));
 				actionArguments.set(1, sanitize(actionArguments.get(1)));

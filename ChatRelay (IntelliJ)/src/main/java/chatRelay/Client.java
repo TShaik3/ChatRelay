@@ -14,10 +14,8 @@ import java.util.List;
 
 public class Client {
     private Socket socket;
-    private Boolean isConnected;
-    private String targetIP;
-    private String targetPort;
-    
+    private boolean isConnected;
+
     private String username;
     private Chat lastChatSent;
     
@@ -29,24 +27,21 @@ public class Client {
     
     private ObjectOutputStream objectStream;
     private ObjectInputStream objectInStream;
-    private ClientInput input;
     private GUI clientGUI;
 
     public Client(String targetIp, String targetPort) {
-        this.targetIP = targetIp;
-        this.targetPort = targetPort;
         isConnected = false;
         users = new ArrayList<>();
         chats = new ArrayList<>();
         try {
-            socket = new Socket(targetIP, Integer.parseInt(targetPort));
+            socket = new Socket(targetIp, Integer.parseInt(targetPort));
             OutputStream outputStream = socket.getOutputStream();
             objectStream = new ObjectOutputStream(outputStream);
 
             InputStream inputStream = socket.getInputStream();
             objectInStream = new ObjectInputStream(inputStream);
         } catch (IOException | NumberFormatException e) {
-        	e.printStackTrace();
+        	System.out.println("Error connecting to server");
         }
     }
 
@@ -55,8 +50,8 @@ public class Client {
     	clientGUI = new GUI(this);
     	
     	new Thread(clientGUI).start();
-    	
-    	input = new ClientInput(objectInStream, this);
+
+        ClientInput input = new ClientInput(objectInStream, this);
     	
     	new Thread(input).start();
     	
@@ -73,7 +68,7 @@ public class Client {
     	try {
     		objectStream.writeObject(login);
     	} catch (IOException e) {
-    		e.printStackTrace();
+    		System.out.println("Error logging in");
     	}
     }
     
@@ -86,12 +81,12 @@ public class Client {
     	try {
     		objectStream.writeObject(sendMessage);
     	} catch (IOException e) {
-    		e.printStackTrace();
+    		System.out.println("Error sending message");
     	}
     	lastChatSent = getChatById(chatId);
     }
     
-    public void createChat(String[] userIds, String chatName, Boolean isPrivate) {
+    public void createChat(String[] userIds, String chatName, boolean isPrivate) {
     	ArrayList<String> args = new ArrayList<>();
     	String joinedUsers = String.join("/", userIds);
     	args.add(joinedUsers);
@@ -101,11 +96,11 @@ public class Client {
     	try {
     		objectStream.writeObject(createChat);
     	} catch (IOException e) {
-    		e.printStackTrace();
+    		System.out.println("Error creating chat");
     	}
     }
         
-    public void createUser(String username, String password, String firstname, String lastname, Boolean isAdmin) {
+    public void createUser(String username, String password, String firstname, String lastname, boolean isAdmin) {
     	if (isITAdmin) {
         	ArrayList<String> args = new ArrayList<>();
         	args.add(username);
@@ -118,7 +113,7 @@ public class Client {
     		try {
         		objectStream.writeObject(createUser);
         	} catch (IOException e) {
-        		e.printStackTrace();
+        		System.out.println("Error creating user");
         	}
     	}
     }
@@ -132,7 +127,7 @@ public class Client {
     		try {
         		objectStream.writeObject(enableUser);
         	} catch (IOException e) {
-        		e.printStackTrace();
+        		System.out.println("Error updating user");
         	}
     	}
     }
@@ -146,50 +141,11 @@ public class Client {
 		try {
 			objectStream.writeObject(updateChat);
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("Error updating chat");
 		}
 	}
 
-    public void addUserToChat(String userId, String chatId) {
-    	ArrayList<String> args = new ArrayList<>();
-    	args.add(userId);
-    	args.add(chatId);
-    	Packet addUser = new Packet(Status.NONE, actionType.ADD_USER_TO_CHAT, args, this.userId);
-    	try {
-    		objectStream.writeObject(addUser);
-    	} catch (IOException e) {
-    		e.printStackTrace();
-    	}
-    	lastChatSent = getChatById(chatId);
-    }
-    
-    public void removeUserFromChat(String userId, String chatId) {
-    	ArrayList<String> args = new ArrayList<>();
-    	args.add(userId);
-    	args.add(chatId);
-    	Packet removeUser = new Packet(Status.NONE, actionType.REMOVE_USER_FROM_CHAT, args, this.userId);
-    	try {
-    		objectStream.writeObject(removeUser);
-    	} catch (IOException e) {
-    		e.printStackTrace();
-    	}
-    	lastChatSent = getChatById(chatId);
-    }
-    
-    public void renameChat(String chatId, String chatName) {
-    	ArrayList<String> args = new ArrayList<>();
-    	args.add(chatId);
-    	args.add(chatName);
-    	Packet renameChat = new Packet(Status.NONE, actionType.RENAME_CHAT, args, this.userId);
-    	try {
-    		objectStream.writeObject(renameChat);
-    	} catch (IOException e) {
-    		e.printStackTrace();
-    	}
-    	lastChatSent = getChatById(chatId);
-    }
-    
-    public void saveChatToTxt(Chat chat) {
+	public void saveChatToTxt(Chat chat) {
     	if (isITAdmin) {
     		String fileName = "chat_logs_" + chat.getRoomName() +".txt";
 
@@ -205,7 +161,7 @@ public class Client {
                 }
                 bufferedWriter.close();
             } catch (IOException e) {
-            	e.printStackTrace();
+            	System.out.println("Error saving chat to txt");
             }
     	}
     }
@@ -220,19 +176,15 @@ public class Client {
     		objectInStream.close();
     		socket.close();
     	} catch (IOException e) {
-    		e.printStackTrace();
+    		System.out.println("Error logging out");
     	}
     }
     
     public void updateState(actionType action) {
     	clientGUI.update(action);
     }
-    
-    public Boolean getIsConnected() {
-    	return isConnected;
-    }
-    
-    public String getThisUserId() {
+
+	public String getThisUserId() {
     	return userId;
     }
     
@@ -255,26 +207,7 @@ public class Client {
     public Chat getLastChatSent() {
     	return lastChatSent;
     }
-    
-     //Made for getting Users for Create Chat in GUI
-    public void getAllUsers() {
-    	Packet getUsers = new Packet(Status.NONE, actionType.GET_ALL_USERS, new ArrayList<String> (), userId);
-    	try {
-    		objectStream.writeObject(getUsers);
-    	} catch (IOException e) {
-    		e.printStackTrace();
-    	}
-    }
-    
-    public void getAllChats() {
-    	Packet getChats = new Packet(Status.NONE, actionType.GET_ALL_CHATS, new ArrayList<String> (), userId);
-    	try {
-    		objectStream.writeObject(getChats);
-    	} catch (IOException e) {
-    		e.printStackTrace();
-    	}
-    }
-    
+
 	private AbstractUser getUserById(String userId) {
 		for (AbstractUser user : users) {
 			if (userId.equals(user.getId())) {
@@ -296,8 +229,8 @@ public class Client {
     private class ClientInput implements Runnable { // Added
     	private static final String ESCAPED_SLASH = "498928918204";
     	
-    	private ObjectInputStream inputStream;
-    	private Client client;
+    	private final ObjectInputStream inputStream;
+    	private final Client client;
     	
     	public ClientInput(ObjectInputStream input, Client client) {
     		this.inputStream = input;
@@ -321,13 +254,13 @@ public class Client {
 							userId = args.get(0);
 							String firstName = args.get(1);
 							String lastName = args.get(2);
-							isITAdmin = args.get(3).equals("true") ? true : false;
-							boolean isDisabled = args.get(4).equals("true") ? true : false;
+							isITAdmin = (Boolean) (args.get(3).equals("true"));
+							boolean isDisabled = args.get(4).equals("true");
 							
 							if (isITAdmin) {
-								thisUser = new ITAdmin(true, userId, username, firstName, lastName, isDisabled, isITAdmin);
+								thisUser = new ITAdmin(true, userId, username, firstName, lastName, isDisabled, true);
 							} else {
-								thisUser = new User(true, userId, username, firstName, lastName, isDisabled, isITAdmin);
+								thisUser = new User(true, userId, username, firstName, lastName, isDisabled, false);
 							}
 							
 							synchronized (clientGUI.getFrame()) {
@@ -343,7 +276,7 @@ public class Client {
 								String chatId = words[0];
 								String ownerId = words[1];
 								String roomName = words[2];
-								boolean isPrivate = words[3].equals("true") ? true : false;
+								boolean isPrivate = words[3].equals("true");
 								String[] userIds = words[4].split(",");
 
 								AbstractUser owner = getUserById(ownerId);
@@ -366,8 +299,8 @@ public class Client {
 								String username = words[1];
 								String firstName = words[2];
 								String lastName = words[3];
-								boolean isDisabled = words[4].equals("true") ? true : false;
-								boolean isAdmin = words[5].equals("true") ? true : false;
+								boolean isDisabled = words[4].equals("true");
+								boolean isAdmin = words[5].equals("true");
 
 								AbstractUser newUser;
 
@@ -511,7 +444,7 @@ public class Client {
 						}
 					}
 				} while(isConnected && (incoming = (Packet) inputStream.readObject()) != null);
-			} catch (ClassNotFoundException | IOException e) {
+			} catch (ClassNotFoundException | IOException ignored) {
 				
 			}
 		}
