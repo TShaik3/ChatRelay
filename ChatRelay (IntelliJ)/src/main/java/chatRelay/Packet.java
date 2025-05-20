@@ -53,7 +53,7 @@ public class Packet implements Serializable {
 				actionArguments.set(1, sanitize(actionArguments.get(1)));
 				break;
 			case SEND_MESSAGE:
-				actionArguments.set(0, sanitize(actionArguments.getFirst()));
+				actionArguments.set(0, sanitize(actionArguments.get(0)));
 				break;
 			case CREATE_CHAT, RENAME_CHAT:
 				actionArguments.set(1, sanitize(actionArguments.get(1)));

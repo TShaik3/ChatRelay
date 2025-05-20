@@ -1,7 +1,6 @@
 package chatRelay;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class Chat {
@@ -76,6 +75,7 @@ public class Chat {
     
    
     // get as text format for the DB .txt file
+    @Override
     public String toString() {
     	List<String> chatterIds = new ArrayList<>();
     	

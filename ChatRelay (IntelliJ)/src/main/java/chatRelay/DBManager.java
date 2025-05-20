@@ -13,7 +13,6 @@ public class DBManager {
 	private ConcurrentHashMap<String, Chat> chats = new ConcurrentHashMap<>();
 	private ConcurrentHashMap<String, Message> messages = new ConcurrentHashMap<>();
 
-	private Server server; // maybe not needed?
     private final String userTxtFilename;
 	private final String chatTxtFilename;
 	private final String messageTxtFilename;
@@ -304,16 +303,12 @@ public class DBManager {
 		return newMessage;
 
 	}
-
-	// private User stringToUser(String userString) {}
-	// private Chat stringToChat(String chatString) {}
-	// private Message StringToMessage(String messageString) {}
-
-	private void getSanitizedString(String input, String output) {
-		// Don't use this function? just use .replace()
-		// ex for incoming messages from user into DB: str1.replace("/", [sLaSH])
-		// ex for loading messages from DB into memory: str1.replace("[sLaSH]", /)
-	}
+    // private User stringToUser(String userString) {}
+    // private Chat stringToChat(String chatString) {}
+    // private Message StringToMessage(String messageString) {}
+    // Don't use this function? just use .replace()
+    // ex for incoming messages from user into DB: str1.replace("/", [sLaSH])
+    // ex for loading messages from DB into memory: str1.replace("[sLaSH]", /)
 
 //	public void addUserToChat(String userId) {
 //	}
@@ -369,7 +364,6 @@ public class DBManager {
 
 	public synchronized Chat addUserToChat(String userId, String chatId, String packetSenderUserId) {
 		AbstractUser userToAdd = getUserById(userId);
-		AbstractUser packetSender = getUserById(packetSenderUserId);
 		Chat chat = getChatById(chatId);
 
 		// requestor must be the owner of the chat
@@ -400,7 +394,6 @@ public class DBManager {
 
 	public synchronized Chat removeUserFromChat(String userId, String chatId, String packetSenderUserId) {
 		AbstractUser userToRemove = getUserById(userId);
-		AbstractUser packetSender = getUserById(packetSenderUserId);
 		Chat chat = getChatById(chatId);
 
 		// requestor must be the owner of the chat
