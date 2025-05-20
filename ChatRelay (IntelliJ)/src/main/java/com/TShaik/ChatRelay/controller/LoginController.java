@@ -16,6 +16,6 @@ public class LoginController {
 
     @PostMapping("/")
     public ResponseEntity<Boolean> getMessage(@RequestBody() LoginRequestData login) {
-        return new ResponseEntity<>(true, HttpStatus.OK);
+        return new ResponseEntity<>(login.isValid(dbManager), HttpStatus.OK);
     }
 }
