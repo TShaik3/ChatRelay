@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
 public class Server {
 	private static final ConcurrentHashMap<String, ClientHandler> clients = new ConcurrentHashMap<>();
 
-	private DBManager dbManager;
-	private int port;
-	private String IP;
+	private final DBManager dbManager;
+	private final int port;
+	private final String IP;
 
 	public Server(int port, String IP) {
 		this.port = port;
@@ -30,22 +30,28 @@ public class Server {
 	
 	}
 
-	public void connect() {
-		System.out.println("Server.connect() fired");
-		try (ServerSocket serverSocket = new ServerSocket(port)) {
-			serverSocket.setReuseAddress(true);
-			InetAddress ip = InetAddress.getLocalHost();
-            String currentIp = ip.getHostAddress();
-            System.out.println("Current IP address: " + currentIp);
-			while (true) {
-				Socket socket = serverSocket.accept();
-				ClientHandler clientHandler = new ClientHandler(socket, this);
-				new Thread(clientHandler).start();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public Server(DBManager dbManager) {
+		this.dbManager = dbManager;
+		this.port = 8080;
+		this.IP = "localhost";
 	}
+
+//	public void connect() {
+//		System.out.println("Server.connect() fired");
+//		try (ServerSocket serverSocket = new ServerSocket(port)) {
+//			serverSocket.setReuseAddress(true);
+//			InetAddress ip = InetAddress.getLocalHost();
+//            String currentIp = ip.getHostAddress();
+//            System.out.println("Current IP address: " + currentIp);
+//			while (true) {
+//				Socket socket = serverSocket.accept();
+//				ClientHandler clientHandler = new ClientHandler(socket, this);
+//				new Thread(clientHandler).start();
+//			}
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//	}
 
 	public void receivePacket(String clientId, Packet packet) {
 
@@ -446,21 +452,21 @@ public class Server {
 		return clients.containsKey(userId);
 	}
 
-	public static void main(String[] args) {
-
-// commands to compile + run
-//Src % javac chatRelay/*.java
-//Src % java chatRelay.Server
-//Src % java chatRelay.BasicClient
-		int port = 1337;
-		String IP = "127.0.0.1";
-
-		System.out.println("Server.java's main() fired\n");
-		System.out.println(
-				"NOTE: Database is currently sensitive. Each .txt file needs 1 blank line under the last record\n");
-
-		Server server = new Server(port, IP);
-
-		server.connect();
-	}
+//	public static void main(String[] args) {
+//
+//// commands to compile + run
+////Src % javac chatRelay/*.java
+////Src % java chatRelay.Server
+////Src % java chatRelay.BasicClient
+//		int port = 1337;
+//		String IP = "127.0.0.1";
+//
+//		System.out.println("Server.java's main() fired\n");
+//		System.out.println(
+//				"NOTE: Database is currently sensitive. Each .txt file needs 1 blank line under the last record\n");
+//
+//		Server server = new Server(port, IP);
+//
+//		server.connect();
+//	}
 }

@@ -34,7 +34,7 @@ public class Packet implements Serializable {
 	private String id;
 	private final actionType acType;
 	private final Status status;
-	private final ArrayList<String> actionArgs;
+	private final ArrayList<String> actionArgs; //TODO: Change to Lists, All Instances
 	private final LocalTime timeCreated;
 	private final String senderId;
 
